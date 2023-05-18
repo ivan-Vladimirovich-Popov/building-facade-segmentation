@@ -14,10 +14,9 @@ from IPython.display import clear_output
 from check_rgb_on_class import image_class_check,image_class_get
 
 
-path1="dataset/original"
-path2="dataset/labeleds"
-or_save=r"C:\Users\Zabeeman\PycharmProjects\Recognition_of_building_facades\dataset\original"
-lab_save=r"C:\Users\Zabeeman\PycharmProjects\Recognition_of_building_facades\dataset\labeleds"
+path1="dataset with original images"
+path2="dataset with image labels"
+
 classes_by_id = dict()
 background={0:(0, 0, 0)}
 colum={(4,"colum"):([220,255],[0,70],[0,70])}
@@ -41,12 +40,11 @@ classes2={(0,"background"):(0,0,0),
 
 for (id,name),rgb_list in classes2.items():
     classes_by_id[id]=rgb_list,name
-
 for classes in classes2.items():
     def get_dataset_subimage(dataset_subimage_id: str) -> Tuple[Image.Image, Image.Image]:
 
-      subimage = Image.open(fp=f'{or_save}/{dataset_subimage_id}.jpg')
-      subimage_labeled = Image.open(fp=f'{lab_save}/{dataset_subimage_id}_labeled.jpg')
+      subimage = Image.open(fp=f'{path1}/{dataset_subimage_id}.jpg')
+      subimage_labeled = Image.open(fp=f'{path2}/{dataset_subimage_id}_labeled.jpg')
       #print(subimage)
 
       return subimage, subimage_labeled
@@ -79,8 +77,7 @@ for classes in classes2.items():
                     image_mask[class_value[0]][r][c] = 1.0
                 else:
                     image_mask[0][r][c] = 1.0
-        #print("image mask",image_mask)
-        #print("len image mask-", len(image_mask))
+       
 
         return image_mask
 
@@ -93,37 +90,31 @@ for classes in classes2.items():
         image_labeled_ndarray = np.zeros(shape=(image_mask.shape[1], image_mask.shape[2], 3),dtype=np.uint8)
 
         image_mask_hot = image_mask.argmax(axis=0)
-        #print("len image mask hot", len(image_mask_hot))
-        #print("image mask hot ",image_mask_hot)
+        
         for image_lb in image_labeled:
 
             check_im = image_class_get(classes, image_lb)
-            #print("chek im", check_im)
+            
             for r in np.arange(stop=image_mask_hot.shape[0]):
 
-                #print("image mask hot .shape[0]", image_mask_hot.shape[0])
+                
                 for c in np.arange(stop=image_mask_hot.shape[1]):
-                    #print("r-", r)
-                    #print("c-", c)
-                    #print("image mask hot .shape[1]", image_mask_hot.shape[1])
+                 
                     class_id = image_mask_hot[r][c]
-                    #print("class id -",class_id)
-                    #print("class id",class_id)
+                  
 
                     class_by_id_value = classes_by_id.get(class_id)
-                    #print("class by_id value",class_by_id_value)
+                    
                     if class_id<=0:
                         image_labeled_ndarray[r][c] = np.array(object=class_by_id_value[0])
                     else:
-                        #print(check_im)
+                        
                         for get_check in check_im:
                             image_labeled_ndarray[r][c]=get_check
-                    #print("image_labeled_ndarray[r][c]",image_labeled_ndarray[r][c])
+                    
 
             image_labeled = Image.fromarray(obj=image_labeled_ndarray)
-            #print("mask",image_labeled)
-
-
+            
         return image_labeled
 
         #count -= 1
@@ -284,7 +275,6 @@ for classes in classes2.items():
     plt.show()
     torch.save(model.state_dict(),'popov_model-_1.h5')
 
-"""
     def test(model: torch.nn.Module,device: torch.DeviceObjType,test_dataloader: torch.utils.data.DataLoader,loss_fn: Any,) -> Dict[str, List[float]]:
 
         history_metrics = {'pixel_accuracy': list(),'iou': list()}
@@ -370,57 +360,6 @@ for classes in classes2.items():
         if si == 5 - 1:
             break
 
-    plt.show()"""
-"""def run():
-    subimage, subimage_labeled = get_dataset_subimage(dataset_subimage_id='i38si0')
-    predicted_image_labeled = predict(image=subimage,model=model,device=device,image_labeled=subimage_labeled)
-    fig, ax = plt.subplots(ncols=3)
-    ax[0].imshow(subimage)
-    ax[1].imshow(predicted_image_labeled)
-    ax[2].imshow(subimage_labeled)
     plt.show()
 
-def main():
-    run()
 
-if __name__=="__main__":
-    main()
-
-"""
-"""
-в свой модуль добавил отбор на схожие к классу цвета ргб
-подумать как действовать длаее 
-подумать о том, как происходит отбор класс валуе 
-и нужна ли ему другая функция 
-"""
-
-
-"""
-# def run():
-#     subimage, subimage_labeled = get_dataset_subimage(dataset_subimage_id='i38si0')
-#     subimage_mask = get_image_mask_from_labeled(
-#         image_labeled=subimage_labeled,
-#         classes=classes)
-#     subimage_labeled_from_mask = get_image_labeled_from_mask(
-#         image_mask=subimage_mask,
-#         classes_by_id=classes_by_id,
-#         image_labeled=subimage_labeled)
-#     fig, ax = plt.subplots(ncols=3)
-#     ax[0].imshow(subimage_labeled)
-#     #for subimage_labeled_from in subimage_labeled_from_mask:
-#     ax[1].imshow(subimage_labeled_from_mask)
-#     ax[2].imshow(subimage)
-#     #ax[3].imshow(subimage_mask)
-#     plt.show()
-#
-# def main():
-#     run()
-# if __name__=="__main__":
-#     main()
-
-"""
-# for i, filename in enumerate(listdir(r'C:\Users\Zabeeman\PycharmProjects\Recognition_of_building_facades\1\dataset\trainA')):
-#
-#
-# image = Image.open(fp=f'C:\\Users\\Zabeeman\\PycharmProjects\\Recognition_of_building_facades\\1\\dataset\\trainA\\{basename}.jpg').crop(box=(16, 40, 7200 - 16, 6800 - 40))
-#         image_labeled = Image.open(fp=f'C:\\Users\\Zabeeman\\PycharmProjects\\Recognition_of_building_facades\\1\\dataset\\trainB\\{basename[:3]}_B.jpg').crop(box=(16, 40, 7200 - 16, 6800 - 40))
