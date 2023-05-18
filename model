@@ -52,41 +52,24 @@ for classes in classes2.items():
 
 
     def get_image_mask_from_labeled(image_labeled: Image.Image,classes):
-        # print("len classes",len(classes2))
-        # print("class content",classes[0])
-
-
         image_mask = np.zeros(shape=(len(classes2),image_labeled.size[0],image_labeled.size[1]))
-        #print("image mask old-",image_mask)
-
         image_labeled_ndarray = np.array(object=image_labeled)
         for r in np.arange(stop=image_labeled_ndarray.shape[0]):
-            #print("image_labeled_ndarray.shape[0]",image_labeled_ndarray.shape[0])
             for c in np.arange(stop=image_labeled_ndarray.shape[1]):
-                #print("image_labeled_ndarray.shape[1]",image_labeled_ndarray.shape[1])
                 class_rgb = tuple(image_labeled_ndarray[r][c])
-                #print("class rgb",class_rgb)
                 classes_reforms=image_class_check(classes,class_rgb)
-
-                class_value = classes_reforms
-                #print("class value-", class_value)
-
-                #print(class_value)
+                class_value = classes_reforms               
                 if class_value != None:
                     #print(class_value[0])
                     image_mask[class_value[0]][r][c] = 1.0
                 else:
                     image_mask[0][r][c] = 1.0
        
-
         return image_mask
-
-
 
 
     def get_image_labeled_from_mask(image_mask,classes_by_id,image_labeled,classes):
 
-        #print(image_mask)
         image_labeled_ndarray = np.zeros(shape=(image_mask.shape[1], image_mask.shape[2], 3),dtype=np.uint8)
 
         image_mask_hot = image_mask.argmax(axis=0)
@@ -96,13 +79,11 @@ for classes in classes2.items():
             check_im = image_class_get(classes, image_lb)
             
             for r in np.arange(stop=image_mask_hot.shape[0]):
-
                 
                 for c in np.arange(stop=image_mask_hot.shape[1]):
                  
                     class_id = image_mask_hot[r][c]
                   
-
                     class_by_id_value = classes_by_id.get(class_id)
                     
                     if class_id<=0:
@@ -112,7 +93,6 @@ for classes in classes2.items():
                         for get_check in check_im:
                             image_labeled_ndarray[r][c]=get_check
                     
-
             image_labeled = Image.fromarray(obj=image_labeled_ndarray)
             
         return image_labeled
@@ -137,10 +117,7 @@ for classes in classes2.items():
 
 
     train_dataset_subimages_id, test_dataset_subimages_id = train_test_split(get_dataset_subimages_id(), train_size=0.9)
-    print("train_dataset_subimages_id",train_dataset_subimages_id)
-    print("test_dataset_subimages_id",test_dataset_subimages_id)
-
-
+    
     class Dataset(torch.utils.data.Dataset):
         def __init__(self,dataset_subimages_id: List[str],classes):
             self.dataset_subimages_id = dataset_subimages_id
@@ -167,9 +144,6 @@ for classes in classes2.items():
     train_dataloader = torch.utils.data.DataLoader(dataset=train_dataset,batch_size=16,shuffle=True)
 
     test_dataloader = torch.utils.data.DataLoader(dataset=test_dataset,batch_size=1)
-
-    #print("test_dataloader size",test_dataloader.size())
-    #print("train_dataloader size",train_dataloader.size())
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -316,7 +290,7 @@ for classes in classes2.items():
         for id1 in marker_id:
             image, image_labeled = get_dataset_subimage(dataset_subimage_id=id1)
             image_lebeleds.append(image_labeled)
-        #print(image_lebeleds)
+        
         return image_lebeleds
 
 
