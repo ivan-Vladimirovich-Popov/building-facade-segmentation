@@ -1,0 +1,414 @@
+import webcolors
+from PIL import ImageColor
+import numpy as np
+
+
+def image_class_check(classes,class_rgb):
+    #for classes in classes2.items():
+    check_point = True
+    classes_name_id=classes[0]
+    id=classes_name_id[0]
+    rgb_list=classes[1]
+    class_rgb=class_rgb
+    # print(id)
+    # print(name)
+    # print(rgb_list)
+    #print(rgb_list)
+    # print("class_rgb for ",class_rgb)
+    r1 = rgb_list[0]
+    g1 = rgb_list[1]
+    b1 = rgb_list[2]
+    if id !=0:
+        # print(r1)
+        # print(len(r1),"len r1")
+        # print(g1)
+        # print(len(g1),"len g1")
+        # print(b1)
+        # print(len(b1),"len b1")
+        if len(r1) > 1 and len(g1) > 1 and len(b1) > 1:
+            if class_rgb[0] in range(r1[0], r1[1]) and class_rgb[1] in range(g1[0], g1[1]) and class_rgb[2] in range(b1[0], b1[1]):
+                check_point = True
+            else:
+                check_point = False
+
+        elif len(r1) <= 1 and len(g1) > 1 and len(b1) > 1:
+            if r1[0]/1!=0:
+                if class_rgb[0] in range(r1[0]) and class_rgb[1] in range(g1[0], g1[1]) and class_rgb[2] in range(b1[0],b1[1]):
+                    check_point = True
+                else:
+                    check_point = False
+            else:
+                if class_rgb[1] in range(g1[0], g1[1]) and class_rgb[2] in range(b1[0],b1[1]):
+                    check_point = True
+                else:
+                    check_point = False
+
+        elif len(r1) > 1 and len(g1) <= 1 and len(b1) > 1:
+            if g1[0]/1!=0:
+                if class_rgb[0] in range(r1[0], r1[1]) and class_rgb[1] in range(g1[0]) and class_rgb[2] in range(b1[0],b1[1]):
+                    check_point = True
+                else:
+                    check_point = False
+            else:
+                if class_rgb[0] in range(r1[0], r1[1]) and class_rgb[2] in range(b1[0],b1[1]):
+                    check_point = True
+                else:
+                    check_point = False
+
+        elif len(r1) > 1 and len(g1) > 1 and len(b1) <= 1:
+            if b1[0]/1!=0:
+                if class_rgb[0] in range(r1[0], r1[1]) and class_rgb[1] in range(g1[0], g1[1]) and class_rgb[2] in range(
+                        b1[0]):
+                    check_point = True
+                else:
+                    check_point = False
+            else:
+                if class_rgb[0] in range(r1[0], r1[1]) and class_rgb[1] in range(g1[0], g1[1]):
+                    check_point = True
+                else:
+                    check_point = False
+
+        elif len(r1) <= 1 and len(g1) <= 1 and len(b1) > 1:
+            if r1[0]/1!=0 and g1[0]/1!=0:
+                if class_rgb[0] in range(r1[0]) and class_rgb[1] in range(g1[0]) and class_rgb[2] in range(b1[0], b1[1]):
+                    check_point = True
+                else:
+                    check_point = False
+            elif r1[0]/1==0 and g1[0]!=0:
+                if class_rgb[1] in range(g1[0]) and class_rgb[2] in range(b1[0], b1[1]):
+                    check_point = True
+                else:
+                    check_point = False
+            elif g1[0]/1==0 and r1[0]/1!=0:
+                if class_rgb[0] in range(r1[0]) and class_rgb[2] in range(b1[0], b1[1]):
+                    check_point = True
+                else:
+                    check_point = False
+            else:
+                if class_rgb[2] in range(b1[0], b1[1]):
+                    check_point = True
+                else:
+                    check_point = False
+
+
+
+
+        elif len(r1) <= 1 and len(g1) <= 1 and len(b1) <= 1:
+            if r1[0]/1!=0 and g1[0]/1!=0 and b1[0]/1!=0:
+                if class_rgb[0] in range(r1[0]) and class_rgb[1] in range(g1[0]) and class_rgb[2] in range(b1[0], b1[1]):
+                    check_point = True
+                else:
+                    check_point = False
+
+            elif r1[0]/1==0 and g1[0]/1!=0 and b1[0]/1!=0:
+                if class_rgb[1] in range(g1[0]) and class_rgb[2] in range(b1[0], b1[1]):
+                    check_point = True
+                else:
+                    check_point = False
+
+            elif r1[0]/1!=0 and g1[0]/1==0 and b1[0]/1!=0:
+                if class_rgb[0] in range(r1[0]) and class_rgb[2] in range(b1[0], b1[1]):
+                    check_point = True
+                else:
+                    check_point = False
+
+            elif g1[0]/1!=0 and r1[0]/1!=0 and b1[0]/1==0:
+                if class_rgb[0] in range(r1[0]) and class_rgb[1] in range(g1[0]):
+                    check_point = True
+                else:
+                    check_point = False
+
+            elif r1[0]/1==0 and g1[0]/1==0 and b1[0]/1!=0:
+                if class_rgb[2] in range(b1[0], b1[1]):
+                    check_point = True
+                else:
+                    check_point = False
+
+            elif r1[0]/1!=0 and g1[0]/1==0 and b1[0]/1==0:
+                if class_rgb[0] in range(r1[0], r1[1]):
+                    check_point = True
+                else:
+                    check_point = False
+
+            elif r1[0]/1==0 and g1[0]/1!=0 and b1[0]/1==0:
+                if class_rgb[1] in range(g1[0]):
+                    check_point = True
+                else:
+                    check_point = False
+
+            elif r1[0]/1==0 and g1[0]/1==0 and b1[0]/1!=0:
+                if class_rgb[1] in range(g1[0]):
+                    check_point = True
+                else:
+                    check_point = False
+
+            else:
+                check_point = False
+
+
+        elif len(r1) > 1 and len(g1) <= 1 and len(b1) <= 1:
+            if g1[0]/1!=0 and b1[0]/1!=0:
+                if class_rgb[0] in range(r1[0], r1[1]) and class_rgb[1] in range(g1[0]) and class_rgb[2] in range(b1[0]):
+                    check_point = True
+                else:
+                    check_point = False
+            elif g1[0]/1==0 and b1[0]/1!=0:
+                if class_rgb[0] in range(r1[0], r1[1]) and class_rgb[2] in range(b1[0]):
+                    check_point = True
+                else:
+                    check_point = False
+
+            elif g1[0]/1!=0 and b1[0]/1==0:
+                if class_rgb[0] in range(r1[0], r1[1]) and class_rgb[1] in range(g1[0]):
+                    check_point = True
+                else:
+                    check_point = False
+            else:
+                if class_rgb[0] in range(r1[0], r1[1]):
+                    check_point = True
+                else:
+                    check_point = False
+
+        elif len(r1) <= 1 and len(g1) > 1 and len(b1) <= 1:
+            if r1[0]/1!=0 and b1[0]/1!=0:
+                if class_rgb[0] in range(r1[0]) and class_rgb[1] in range(g1[0], g1[1]) and class_rgb[2] in range(b1[0]):
+                    check_point = True
+                else:
+                    check_point = False
+            elif r1[0]/1!=0 and b1[0]/1==0:
+                if class_rgb[0] in range(r1[0]) and class_rgb[1] in range(g1[0], g1[1]):
+                    check_point = True
+                else:
+                    check_point = False
+            elif r1[0]/1==0 and b1[0]/1!=0:
+                if class_rgb[1] in range(g1[0], g1[1]) and class_rgb[2] in range(b1[0]):
+                    check_point = True
+                else:
+                    check_point = False
+
+        else:
+            check_point = False
+    else:
+        return classes[0]
+    if check_point==False:
+        return None
+    else:
+        return classes[0]
+
+
+
+
+
+def bgr_to_hex(bgr):
+   rgb =list(bgr)
+   rgb.reverse()
+   return webcolors.rgb_to_hex(tuple(rgb))
+
+def FindColors(mask):
+    im = np.array(object=mask)
+    image = im[:, :, :3]
+    color_hex = []
+    for i in image:
+        for  j in i:
+            j = list(j)
+            color_hex.append(bgr_to_hex(tuple(j)))
+    return set(color_hex)
+
+
+
+
+def color_hex_to_rgb(image):
+    color_list=FindColors(image)
+    color_spec = []
+    for i in color_list:
+        image=ImageColor.getcolor(i,"RGB")
+        color_spec.append(image)
+    return color_spec
+
+
+
+def image_class_get(classes,image_labeled):
+    #for classes in classes2.items():
+    classes_rgb=[]
+    color_list_rgb_to_image=color_hex_to_rgb(image_labeled)
+    for rgb_format in color_list_rgb_to_image:
+        class_rgb=rgb_format
+        check_point = True
+        classes_name_id = classes[0]
+        id = classes_name_id[0]
+        rgb_list = classes[1]
+        if id!=0:
+            class_rgb=class_rgb
+            r1 = rgb_list[0]
+            g1 = rgb_list[1]
+            b1 = rgb_list[2]
+            if len(r1) > 1 and len(g1) > 1 and len(b1) > 1:
+                if class_rgb[0] in range(r1[0], r1[1]) and class_rgb[1] in range(g1[0], g1[1]) and class_rgb[2] in range(b1[0], b1[1]):
+                    check_point = True
+                else:
+                    check_point = False
+
+            elif len(r1) <= 1 and len(g1) > 1 and len(b1) > 1:
+                if r1[0]/1!=0:
+                    if class_rgb[0] in range(r1[0]) and class_rgb[1] in range(g1[0], g1[1]) and class_rgb[2] in range(b1[0],b1[1]):
+                        check_point = True
+                    else:
+                        check_point = False
+                else:
+                    if class_rgb[1] in range(g1[0], g1[1]) and class_rgb[2] in range(b1[0],b1[1]):
+                        check_point = True
+                    else:
+                        check_point = False
+
+            elif len(r1) > 1 and len(g1) <= 1 and len(b1) > 1:
+                if g1[0]/1!=0:
+                    if class_rgb[0] in range(r1[0], r1[1]) and class_rgb[1] in range(g1[0]) and class_rgb[2] in range(b1[0],b1[1]):
+                        check_point = True
+                    else:
+                        check_point = False
+                else:
+                    if class_rgb[0] in range(r1[0], r1[1]) and class_rgb[2] in range(b1[0],b1[1]):
+                        check_point = True
+                    else:
+                        check_point = False
+
+            elif len(r1) > 1 and len(g1) > 1 and len(b1) <= 1:
+                if b1[0]/1!=0:
+                    if class_rgb[0] in range(r1[0], r1[1]) and class_rgb[1] in range(g1[0], g1[1]) and class_rgb[2] in range(
+                            b1[0]):
+                        check_point = True
+                    else:
+                        check_point = False
+                else:
+                    if class_rgb[0] in range(r1[0], r1[1]) and class_rgb[1] in range(g1[0], g1[1]):
+                        check_point = True
+                    else:
+                        check_point = False
+
+            elif len(r1) <= 1 and len(g1) <= 1 and len(b1) > 1:
+                if r1[0]/1!=0 and g1[0]/1!=0:
+                    if class_rgb[0] in range(r1[0]) and class_rgb[1] in range(g1[0]) and class_rgb[2] in range(b1[0], b1[1]):
+                        check_point = True
+                    else:
+                        check_point = False
+                elif r1[0]/1==0 and g1[0]!=0:
+                    if class_rgb[1] in range(g1[0]) and class_rgb[2] in range(b1[0], b1[1]):
+                        check_point = True
+                    else:
+                        check_point = False
+                elif g1[0]/1==0 and r1[0]/1!=0:
+                    if class_rgb[0] in range(r1[0]) and class_rgb[2] in range(b1[0], b1[1]):
+                        check_point = True
+                    else:
+                        check_point = False
+                else:
+                    if class_rgb[2] in range(b1[0], b1[1]):
+                        check_point = True
+                    else:
+                        check_point = False
+
+
+            elif len(r1) <= 1 and len(g1) <= 1 and len(b1) <= 1:
+                if r1[0]/1!=0 and g1[0]/1!=0 and b1[0]/1!=0:
+                    if class_rgb[0] in range(r1[0]) and class_rgb[1] in range(g1[0]) and class_rgb[2] in range(b1[0], b1[1]):
+                        check_point = True
+                    else:
+                        check_point = False
+
+                elif r1[0]/1==0 and g1[0]/1!=0 and b1[0]/1!=0:
+                    if class_rgb[1] in range(g1[0]) and class_rgb[2] in range(b1[0], b1[1]):
+                        check_point = True
+                    else:
+                        check_point = False
+
+                elif r1[0]/1!=0 and g1[0]/1==0 and b1[0]/1!=0:
+                    if class_rgb[0] in range(r1[0]) and class_rgb[2] in range(b1[0], b1[1]):
+                        check_point = True
+                    else:
+                        check_point = False
+
+                elif g1[0]/1!=0 and r1[0]/1!=0 and b1[0]/1==0:
+                    if class_rgb[0] in range(r1[0]) and class_rgb[1] in range(g1[0]):
+                        check_point = True
+                    else:
+                        check_point = False
+
+                elif r1[0]/1==0 and g1[0]/1==0 and b1[0]/1!=0:
+                    if class_rgb[2] in range(b1[0], b1[1]):
+                        check_point = True
+                    else:
+                        check_point = False
+
+                elif r1[0]/1!=0 and g1[0]/1==0 and b1[0]/1==0:
+                    if class_rgb[0] in range(r1[0], r1[1]):
+                        check_point = True
+                    else:
+                        check_point = False
+
+                elif r1[0]/1==0 and g1[0]/1!=0 and b1[0]/1==0:
+                    if class_rgb[1] in range(g1[0]):
+                        check_point = True
+                    else:
+                        check_point = False
+
+                elif r1[0]/1==0 and g1[0]/1==0 and b1[0]/1!=0:
+                    if class_rgb[1] in range(g1[0]):
+                        check_point = True
+                    else:
+                        check_point = False
+
+                else:
+                    check_point = False
+
+
+            elif len(r1) > 1 and len(g1) <= 1 and len(b1) <= 1:
+                if g1[0]/1!=0 and b1[0]/1!=0:
+                    if class_rgb[0] in range(r1[0], r1[1]) and class_rgb[1] in range(g1[0]) and class_rgb[2] in range(b1[0]):
+                        check_point = True
+                    else:
+                        check_point = False
+                elif g1[0]/1==0 and b1[0]/1!=0:
+                    if class_rgb[0] in range(r1[0], r1[1]) and class_rgb[2] in range(b1[0]):
+                        check_point = True
+                    else:
+                        check_point = False
+
+                elif g1[0]/1!=0 and b1[0]/1==0:
+                    if class_rgb[0] in range(r1[0], r1[1]) and class_rgb[1] in range(g1[0]):
+                        check_point = True
+                    else:
+                        check_point = False
+                else:
+                    if class_rgb[0] in range(r1[0], r1[1]):
+                        check_point = True
+                    else:
+                        check_point = False
+
+            elif len(r1) <= 1 and len(g1) > 1 and len(b1) <= 1:
+                if r1[0]/1!=0 and b1[0]/1!=0:
+                    if class_rgb[0] in range(r1[0]) and class_rgb[1] in range(g1[0], g1[1]) and class_rgb[2] in range(b1[0]):
+                        check_point = True
+                    else:
+                        check_point = False
+                elif r1[0]/1!=0 and b1[0]/1==0:
+                    if class_rgb[0] in range(r1[0]) and class_rgb[1] in range(g1[0], g1[1]):
+                        check_point = True
+                    else:
+                        check_point = False
+                elif r1[0]/1==0 and b1[0]/1!=0:
+                    if class_rgb[1] in range(g1[0], g1[1]) and class_rgb[2] in range(b1[0]):
+                        check_point = True
+                    else:
+                        check_point = False
+
+            else:
+                check_point = False
+        else:
+            continue
+        if check_point==False:
+            continue
+
+        else:
+            classes_rgb.append(class_rgb)
+    return classes_rgb
+
