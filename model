@@ -1,5 +1,4 @@
 import os
-
 import torch
 import torch.nn
 from torch.utils.data import dataloader,dataset
@@ -12,7 +11,6 @@ from os import listdir
 from typing import Tuple, List, Dict, Generator, Any
 from IPython.display import clear_output
 from check_rgb_on_class import image_class_check,image_class_get
-
 
 path1="dataset with original images"
 path2="dataset with image labels"
@@ -34,10 +32,6 @@ classes2={(0,"background"):(0,0,0),
 """
 classes2={(0,"background"):(0,0,0),
           (1,"window"):([0],[120,200],[230,255])}
-
-
-
-
 for (id,name),rgb_list in classes2.items():
     classes_by_id[id]=rgb_list,name
 for classes in classes2.items():
@@ -48,8 +42,6 @@ for classes in classes2.items():
       #print(subimage)
 
       return subimage, subimage_labeled
-
-
 
     def get_image_mask_from_labeled(image_labeled: Image.Image,classes):
         image_mask = np.zeros(shape=(len(classes2),image_labeled.size[0],image_labeled.size[1]))
@@ -67,54 +59,35 @@ for classes in classes2.items():
        
         return image_mask
 
-
     def get_image_labeled_from_mask(image_mask,classes_by_id,image_labeled,classes):
-
         image_labeled_ndarray = np.zeros(shape=(image_mask.shape[1], image_mask.shape[2], 3),dtype=np.uint8)
-
-        image_mask_hot = image_mask.argmax(axis=0)
-        
+        image_mask_hot = image_mask.argmax(axis=0)        
         for image_lb in image_labeled:
-
-            check_im = image_class_get(classes, image_lb)
-            
-            for r in np.arange(stop=image_mask_hot.shape[0]):
-                
-                for c in np.arange(stop=image_mask_hot.shape[1]):
-                 
-                    class_id = image_mask_hot[r][c]
-                  
-                    class_by_id_value = classes_by_id.get(class_id)
-                    
+            check_im = image_class_get(classes, image_lb)          
+            for r in np.arange(stop=image_mask_hot.shape[0]):               
+                for c in np.arange(stop=image_mask_hot.shape[1]):             
+                    class_id = image_mask_hot[r][c]                  
+                    class_by_id_value = classes_by_id.get(class_id)                    
                     if class_id<=0:
                         image_labeled_ndarray[r][c] = np.array(object=class_by_id_value[0])
-                    else:
-                        
+                    else:                      
                         for get_check in check_im:
                             image_labeled_ndarray[r][c]=get_check
                     
-            image_labeled = Image.fromarray(obj=image_labeled_ndarray)
-            
+            image_labeled = Image.fromarray(obj=image_labeled_ndarray)   
         return image_labeled
 
-        #count -= 1
-
     def image_preprocess(image: Image.Image) -> torch.Tensor:
-
         return torchvision.transforms.ToTensor()(pic=image)
 
     def get_dataset_subimage_tensor(subimage: Image.Image,subimage_labeled: Image.Image,classes, dtype: torch.FloatType = None,) -> Tuple[torch.Tensor, torch.Tensor]:
-
         subimage_tensor = image_preprocess(image=subimage)
-
         subimage_mask_tensor = torch.tensor(data=get_image_mask_from_labeled(image_labeled=subimage_labeled,classes=classes),dtype=dtype)
-
+        
         return subimage_tensor, subimage_mask_tensor
-
 
     def get_dataset_subimages_id() -> List[str]:
         return [filename[:filename.find('.jpg')]for filename in listdir(path=path1)]
-
 
     train_dataset_subimages_id, test_dataset_subimages_id = train_test_split(get_dataset_subimages_id(), train_size=0.9)
     
@@ -149,77 +122,52 @@ for classes in classes2.items():
 
     model = torchvision.models.segmentation.fcn_resnet101(num_classes=len(classes2),weights_backbone=torchvision.models.ResNet101_Weights.IMAGENET1K_V1).to(device=device)
 
-
-
     def predict(image: Image.Image,model: torch.nn.Module,device: torch.DeviceObjType,image_labeled,classes) -> Image.Image:
-
         image_tensor = image_preprocess(image=image)
-
         with torch.no_grad():
             output_image_mask = model(image_tensor.unsqueeze(0).to(device))['out'][0].cpu().numpy()
-
-
         predicted_image_labeled = get_image_labeled_from_mask(image_mask=output_image_mask,classes_by_id=classes_by_id,image_labeled=image_labeled,classes=classes)
 
         return predicted_image_labeled
 
-
     def metric_pixel_accuracy(y_pred: torch.Tensor,y_true: torch.Tensor) -> float:
-
         y_pred_argmax = y_pred.argmax(dim=1)
         y_true_argmax = y_true.argmax(dim=1)
-
         correct_pixels = (y_pred_argmax == y_true_argmax).count_nonzero()
         uncorrect_pixels = (y_pred_argmax != y_true_argmax).count_nonzero()
         result = (correct_pixels / (correct_pixels + uncorrect_pixels)).item()
 
         return result
 
-
     def metric_iou(y_pred: torch.Tensor,y_true: torch.Tensor) -> float:
-
         y_pred_hot = y_pred >= 0.51
-
         intersection = torch.logical_and(y_pred_hot, y_true).count_nonzero()
         union = torch.logical_or(y_pred_hot, y_true).count_nonzero()
         result = (intersection / union).item()
 
         return result
 
-
     def train(model: torch.nn.Module ,device: torch.DeviceObjType, train_dataloader: torch.utils.data.DataLoader,loss_fn: Any,optim_fn: Any,epochs: int) -> Dict[str, List[float]]:
         history_metrics = {'loss': list(),'pixel_accuracy': list(),'iou': list()}
         for e in range(1, epochs + 1):
-            #print("train_dataloader",list(train_dataloader))
             for b, data in enumerate(train_dataloader, start=1):
                 subimage_tensor, subimage_mask_tensor,marker_id = data
                 if device.type == 'cuda':
-
                     subimage_tensor = subimage_tensor.to(device)
-
                     subimage_mask_tensor = subimage_mask_tensor.to(device)
-
                 optim_fn.zero_grad()
                 output = model(subimage_tensor)
                 subimage_mask_tensor1=torch.argmax(subimage_mask_tensor, dim=1)
-                print("subimage_mask_tensor1.size()", subimage_mask_tensor1.size())
-                print("output", output["out"].size())
-                #print("subimage_tensor.size()", subimage_mask_tensor)
-                print("subimage_mask_tensor",subimage_mask_tensor.size())
                 loss = loss_fn(output['out'], subimage_mask_tensor1)
                 loss.backward()
                 optim_fn.step()
                 subimage_mask_tensor2=torch.argmax(subimage_mask_tensor, dim=3)
-                print("subimage_mask_tensor2.size()",subimage_mask_tensor2.size())
                 loss_item = loss.item()
                 pixel_accuracy = metric_pixel_accuracy(output['out'], subimage_mask_tensor)
                 iou = metric_iou(output['out'], subimage_mask_tensor)
-
                 history_metrics['loss'].append(loss_item)
                 history_metrics['pixel_accuracy'].append(pixel_accuracy)
                 history_metrics['iou'].append(iou)
-
-                # dynamic output
                 clear_output()
                 print(
                     'Epoch: {}. Batch: {}. Loss: {:.3f} | Pixel Accuracy: {:.3f} | IoU: {:.3f}'.format(
@@ -227,14 +175,11 @@ for classes in classes2.items():
                         loss, pixel_accuracy, iou
                     )
                 )
-
-                # memory clear
                 del subimage_tensor, subimage_mask_tensor, output, loss
                 if device.type == 'cuda':
                     torch.cuda.empty_cache()
 
         return history_metrics
-
 
     history_metrics = train(model=model,device=device,train_dataloader=train_dataloader, loss_fn=torch.nn.CrossEntropyLoss(), optim_fn=torch.optim.AdamW(params=model.parameters(), lr=1e-4),epochs=1)
 
@@ -250,25 +195,18 @@ for classes in classes2.items():
     torch.save(model.state_dict(),'popov_model-_1.h5')
 
     def test(model: torch.nn.Module,device: torch.DeviceObjType,test_dataloader: torch.utils.data.DataLoader,loss_fn: Any,) -> Dict[str, List[float]]:
-
         history_metrics = {'pixel_accuracy': list(),'iou': list()}
-
         for b, data in enumerate(test_dataloader, start=1):
             subimage_tensor, subimage_mask_tensor,marker_id = data
-
             if device.type == 'cuda':
                 subimage_tensor = subimage_tensor.to(device)
                 subimage_mask_tensor = subimage_mask_tensor.to(device)
-
             with torch.no_grad():
                 output = model(subimage_tensor)
-
             pixel_accuracy = metric_pixel_accuracy(output['out'], subimage_mask_tensor)
             iou = metric_iou(output['out'], subimage_mask_tensor)
-
             history_metrics['pixel_accuracy'].append(pixel_accuracy)
             history_metrics['iou'].append(iou)
-
             clear_output()
             print(
                 'Batch: {}. median Pixel Accuracy: {:.3f} | median IoU: {:.3f}'.format(
@@ -278,7 +216,6 @@ for classes in classes2.items():
                 )
             )
 
-            # memory clear
             del subimage_tensor, subimage_mask_tensor, output
             if device.type == 'cuda':
                 torch.cuda.empty_cache()
@@ -306,20 +243,13 @@ for classes in classes2.items():
 
 
     for si, (subimage_tensor, subimage_mask_tensor,marker_id) in enumerate(test_dataloader):
-        print("si", si)
-        print("marker id [si]", marker_id[si])
-        print("marker id ",marker_id)
         image_labeled=marker_id_image(marker_id[si])
-
-
-
         subimage = torchvision.transforms.ToPILImage()(pic=subimage_tensor[0])
         subimage_labeled = get_image_labeled_from_mask(
             image_mask=subimage_mask_tensor[0].cpu().numpy(),
             classes_by_id=classes_by_id,
             classes=classes,
             image_labeled=image_labeled
-
         )
         predicted_subimage_labeled = predict(
             image=subimage,
